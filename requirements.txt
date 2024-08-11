@@ -1,2 +1,6 @@
 streamlit
-re
+pandas
+numpy
+matplotlib
+requests
+beautifulsoup4
