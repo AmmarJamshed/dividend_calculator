@@ -18,9 +18,14 @@ def parse_dividend_info(text):
     info['share_price'] = float(re.search(r'Share Price:\s*(\d+\.\d+)', text).group(1).strip())
     return info
 
+# Assuming face value is known (commonly it's 10 PKR in Pakistan)
+FACE_VALUE = 10
+
 # Function to calculate dividend
-def calculate_dividend(net_quantity, dividend_percent, share_price):
-    return net_quantity * (dividend_percent / 100) * share_price
+def calculate_dividend(net_quantity, dividend_percent):
+    dividend_per_share = FACE_VALUE * (dividend_percent / 100)
+    total_dividend = net_quantity * dividend_per_share
+    return total_dividend
 
 # Streamlit app layout
 st.title("Dividend Calculator")
@@ -61,11 +66,12 @@ if input_text:
     st.write(f"**Share Price:** {dividend_info['share_price']}")
 
     # Calculate dividend
-    dividend = calculate_dividend(dividend_info['net_quantity'], dividend_info['dividend_percent'], dividend_info['share_price'])
+    dividend = calculate_dividend(dividend_info['net_quantity'], dividend_info['dividend_percent'])
     
     # Display dividend
     st.write(f"**Total Dividend Amount:** {dividend}")
 else:
     st.write("Please enter the dividend announcement text to proceed.")
+
 
 
