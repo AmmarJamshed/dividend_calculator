@@ -31,7 +31,55 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Title and header with custom colors
+# Function to parse the text input and extract relevant information
+def parse_dividend_info(text):
+    info = {}
+    
+    # Search for company name
+    company_match = re.search(r'Company Name:\s*(.*)', text)
+    if company_match:
+        info['company_name'] = company_match.group(1).strip()
+    else:
+        st.error("Company Name not found in the input text.")
+    
+    # Search for symbol
+    symbol_match = re.search(r'Symbol:\s*(.*)', text)
+    if symbol_match:
+        info['symbol'] = symbol_match.group(1).strip()
+    else:
+        st.error("Symbol not found in the input text.")
+    
+    # Search for announcement date
+    announcement_date_match = re.search(r'Announcement Date:\s*(.*)', text)
+    if announcement_date_match:
+        info['announcement_date'] = announcement_date_match.group(1).strip()
+    else:
+        st.error("Announcement Date not found in the input text.")
+    
+    # Search for dividend percentage
+    dividend_percent_match = re.search(r'Dividend \(%\):\s*(\d+)', text)
+    if dividend_percent_match:
+        info['dividend_percent'] = float(dividend_percent_match.group(1).strip())
+    else:
+        st.error("Dividend Percentage not found in the input text.")
+    
+    # Search for net quantity
+    net_quantity_match = re.search(r'Net Quantity:\s*(\d+)', text)
+    if net_quantity_match:
+        info['net_quantity'] = int(net_quantity_match.group(1).strip())
+    else:
+        st.error("Net Quantity not found in the input text.")
+    
+    # Search for share price
+    share_price_match = re.search(r'Share Price:\s*(\d+\.\d+)', text)
+    if share_price_match:
+        info['share_price'] = float(share_price_match.group(1).strip())
+    else:
+        st.error("Share Price not found in the input text.")
+    
+    return info
+
+# Streamlit app layout
 st.title("🎨 Colorful Dividend Calculator")
 st.header("📈 Stock Information")
 
@@ -58,55 +106,26 @@ Net Quantity:                          19
 Share Price:                           7200.00"""
 )
 
-# Function to parse the text input and extract relevant information
-def parse_dividend_info(text):
-    info = {}
-    info['company_name'] = re.search(r'Company Name:\s*(.*)', text).group(1).strip()
-    info['symbol'] = re.search(r'Symbol:\s*(.*)', text).group(1).strip()
-    info['announcement_date'] = re.search(r'Announcement Date:\s*(.*)', text).group(1).strip()
-    info['dividend_percent'] = float(re.search(r'Dividend \(%\):\s*(\d+)', text).group(1).strip())
-    info['net_quantity'] = int(re.search(r'Net Quantity:\s*(\d+)', text).group(1).strip())
-    info['share_price'] = float(re.search(r'Share Price:\s*(\d+\.\d+)', text).group(1).strip())
-    return info
-
-# Assuming face value is known (commonly it's 10 PKR in Pakistan)
-FACE_VALUE = 10
-
-# Function to calculate dividend
-def calculate_dividend(net_quantity, dividend_percent):
-    dividend_per_share = FACE_VALUE * (dividend_percent / 100)
-    total_dividend = net_quantity * dividend_per_share
-    return total_dividend
-
 # Process input text
 if input_text:
     # Parse the information
     dividend_info = parse_dividend_info(input_text)
 
-    # Display information with colors
-    st.markdown(f"## Company Name: <span style='color:green'>{dividend_info['company_name']}</span>", unsafe_allow_html=True)
-    st.markdown(f"### Symbol: <span style='color:orange'>{dividend_info['symbol']}</span>", unsafe_allow_html=True)
-    st.markdown(f"#### Announcement Date: <span style='color:blue'>{dividend_info['announcement_date']}</span>", unsafe_allow_html=True)
-    st.markdown(f"#### Dividend Percentage: <span style='color:purple'>{dividend_info['dividend_percent']}%</span>", unsafe_allow_html=True)
-    st.markdown(f"#### Net Quantity: <span style='color:red'>{dividend_info['net_quantity']}</span>", unsafe_allow_html=True)
-    st.markdown(f"#### Share Price: <span style='color:brown'>{dividend_info['share_price']}</span>", unsafe_allow_html=True)
+    if dividend_info:
+        # Display information with colors
+        st.markdown(f"## Company Name: <span style='color:green'>{dividend_info.get('company_name', 'N/A')}</span>", unsafe_allow_html=True)
+        st.markdown(f"### Symbol: <span style='color:orange'>{dividend_info.get('symbol', 'N/A')}</span>", unsafe_allow_html=True)
+        st.markdown(f"#### Announcement Date: <span style='color:blue'>{dividend_info.get('announcement_date', 'N/A')}</span>", unsafe_allow_html=True)
+        st.markdown(f"#### Dividend Percentage: <span style='color:purple'>{dividend_info.get('dividend_percent', 'N/A')}%</span>", unsafe_allow_html=True)
+        st.markdown(f"#### Net Quantity: <span style='color:red'>{dividend_info.get('net_quantity', 'N/A')}</span>", unsafe_allow_html=True)
+        st.markdown(f"#### Share Price: <span style='color:brown'>{dividend_info.get('share_price', 'N/A')}</span>", unsafe_allow_html=True)
 
-    # Calculate dividend
-    dividend = calculate_dividend(dividend_info['net_quantity'], dividend_info['dividend_percent'])
-    
-    # Display dividend result with success message
-    st.success(f"**Total Dividend Amount:** PKR {dividend}")
+        # Calculate dividend
+        dividend = calculate_dividend(dividend_info['net_quantity'], dividend_info['dividend_percent'])
+        
+        # Display dividend result with success message
+        st.success(f"**Total Dividend Amount:** PKR {dividend}")
+    else:
+        st.warning("The input text is missing some required information.")
 else:
     st.warning("Please enter the dividend announcement text to proceed.")
-
-# Using color picker widget to choose a color (just for fun)
-color = st.color_picker("Pick A Color for Your Mood", "#00f900")
-st.write("The selected color is", color)
-
-# Example of using a button with custom styles
-if st.button("🎉 Calculate Dividend Again"):
-    st.write("Calculation done!")
-
-
-
-
